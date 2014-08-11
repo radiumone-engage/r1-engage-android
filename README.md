@@ -151,8 +151,6 @@ analytics.location_in_background=false
 #prevent location tracking for analytics sdk
 analytics.disable_sdk_location=false
 
-#indicate advertising intent
-advertising_enabled=false
 
 ```
 
@@ -177,7 +175,6 @@ As you can see in the example above, it will contain the following:
 
 • 	analytics.location_in_background – set whether or not the location is allowed in analytics sdk to be sent while the app is in the background.
 
-• 	advertising_enabled – set whether or not the application is displaying advertisements.  A value of true prevents the SDK from accessing the Advertising Id to comply with Google's advertising policy when advertisements are served within the application (outside of the SDK).
 
 ##d. Update the manifest
 In your manifest, add the permissions below:
