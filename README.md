@@ -8,7 +8,7 @@
 	- [e. Advance Settings](#user-content-e—advance-settings)
 - [3. Feature Activation](#user-content-3-feature-activation)
 	- [a. Engage Activation](#user-content-a-engage-activation)
-		- [i. Integration of Offerwall, Interstitial and Video](#user-content-i-integration-of-offerwall,-interstitial-and-video)
+		- [i. Integration of Offerwall, Interstitial and Video](#user-content-i-integration-of-offerwall-,-interstitial-and-video)
 		- [ii. Integration of Banner](#user-content-ii-integration-of-banner)
 	- [b. Analytics Activation](#user-content-b-analytics-activation)
 		- [i. Automatic Events](#user-content-i-automatic-events)
@@ -70,7 +70,7 @@ Add Google Play Services to the application manifest:
 	android:value="@integer/google_play_services_version" />
 ```
 
-If using the Publisher SDK add:
+Add R1Publisher activity in AndroidManifest.xml
 
 ```java
 <activity
@@ -79,29 +79,7 @@ If using the Publisher SDK add:
 	android:configChanges="orientation|keyboardHidden|screenSize"/>
 ```
 
-Import the emitter in all your application activities:
-
-```java
-import com.radiumone.emitter.R1Emitter;
-```
-
-And override onStart and onStop methods for each activity:
-
-```java
-@Override
-protected void onStart() {
-	super.onStart();
-	R1Emitter.getInstance().onStart(this);
-}
-
-@Override
-protected void onStop() {
-	super.onStop();
-	R1Emitter.getInstance().onStop(this);
-}
-```
-
-Create a class that extends the Application class (or use an existing one), and initialize the SDK in its onCreate method:
+Create a class that extends the Application class (or use an existing one), and initialize the SDK in its onCreate method. 
 
 ```java
 package com.example.yourpackagename; 
@@ -117,6 +95,31 @@ public class TestApplication extends Application{
 }
 ```
 
+Optional: If you are enabling Analytics SDK in Engage then 
+
+i. Import the emitter in all your application activities:
+
+```java
+import com.radiumone.emitter.R1Emitter;
+```
+
+ii. Override onStart and onStop methods for each activity:
+
+```java
+@Override
+protected void onStart() {
+	super.onStart();
+	R1Emitter.getInstance().onStart(this);
+}
+
+@Override
+protected void onStop() {
+	super.onStop();
+	R1Emitter.getInstance().onStop(this);
+}
+```
+
+
 ##c. Adding R1Connect.properties
 
 To configure how the library will be used in your project you will need to create a file called r1connect.properties in the assets directory of your project.
@@ -126,6 +129,9 @@ To configure how the library will be used in your project you will need to creat
 
 app_id=<YOUR APPLICATION_ID> 
 push.client_key=<YOUR CLIENT KEY>
+
+# default value for analytics when application starts -- set to false to disable analytics in SDK
+analytics.enable=true
 
 # default value for push when application starts -- set to false to use the SDK without push
 push.enable=true
@@ -157,6 +163,8 @@ analytics.disable_sdk_location=false
 As you can see in the example above, it will contain the following:
 
 • 	app_id – You will need to enter the App ID you received when creating your app on R1 Connect (found under Dev Tools -> Keys & Secrets).
+
+• 	analytics.enable - set to "true" enables analytics in Engage SDK and otherwise disables it.
 
 • 	engage.enable – when set to “true” it enables the use of Engage SDK and when set to “false” is disabled.
 
