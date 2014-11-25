@@ -10,6 +10,8 @@
 	- [a. Engage Activation](#user-content-a-engage-activation)
 		- [i. Integration of Offerwall, Interstitial and Video](#user-content-i-integration-of-offerwall-,-interstitial-and-video)
 		- [ii. Integration of Banner](#user-content-ii-integration-of-banner)
+		- [iii. Ad listener events](#user-content-iii-ad-listener-events)
+		- [iv. Ad Check Completion](#user-content-iv-ad-check-completion)
 	- [b. Analytics Activation](#user-content-b-analytics-activation)
 		- [i. Automatic Events](#user-content-i-automatic-events)
 		- [ii. Standard Events](#user-content-ii-standard-events)
@@ -44,7 +46,7 @@ The login page is available at: http://control.radiumone.com/gwallet-network-adm
 
 Drag the “LibConnectEngage.jar” files into your project's libs directory. 
 
-For Eclipse, add the the lib to the build path. 
+For Eclipse, add the lib to the build path. 
 
 This document assumes you have added the Google Play Services project in your eclipse project. If you have not, add the Google Play Services project and reference it in your application. 
 
@@ -63,7 +65,7 @@ dependencies {
 
 **Adding Admob SDK and its adapter**
 
-Make sure you have your account setup in Admob website and have created all the ad placements required by your application. Admob SDK is supported by Google play services. So it doest not require you to download the SDK. Add the proper version of Google play services in build.gradle as explained above. 
+Make sure you have your account setup in Admob website and have created all the ad placements required by your application. Admob SDK is supported by Google play services. So it does not require you to download the SDK. Add the proper version of Google play services in build.gradle as explained above. 
 
 Here is the startup guide for Admob Integration
 
@@ -85,7 +87,7 @@ Add the AdmobAdapter.jar library to the libs directory and refer it to your appl
 
 **Adding Mopub SDK and its adapter**
 
-Make sure you have your mopub account setup in Mopub website and have created all the ad placements required by your application. Here is the link to integrate Mopub SDK with your application,
+Make sure you have your Mopub account setup in Mopub website and have created all the ad placements required by your application. Here is the link to integrate Mopub SDK with your application,
 
 https://github.com/mopub/mopub-android-sdk/wiki/Getting-Started
 
@@ -188,7 +190,7 @@ geofencing.enable=true
 # default value for engage when application starts  — set to false to use SDK without engage
 engage.enable=true
 
-# defalut value is set to false for engage mediation when application start -  set to true to use SDK with mediation
+# default value is set to false for engage mediation when application start -  set to true to use SDK with mediation
 mediation.enable = true
 
 #allow location tracking by gps
@@ -217,7 +219,7 @@ As you can see in the example above, it will contain the following:
 
 • 	engage.enable – when set to “true” it enables the use of Engage SDK and when set to “false” is disabled.
 
-•       mediation.enable - when set to "true" it enables ad mediation. The sdk mediates among selected ad networks to serve the best possible ad. When set to false it disables ad mediation and fetch the ad from Engage network.
+•       mediation.enable - when set to "true" it enables ad mediation. The sdk mediates among selected ad networks to serve the best possible ad When set to false it disables ad mediation and fetch the ad from Engage network.
 
 • 	push.client_key – You will need to enter the App Key you received when creating your app on R1 Connect (found under Dev Tools -> Keys & Secrets).
 
@@ -277,7 +279,7 @@ where:
 
 **```<Optional Gender>```** is user's gender
 
-This parametes are helpful  to serve more finely targeted ads.
+These parametes are helpful  to serve more finely targeted ads.
 
 
 
@@ -351,7 +353,7 @@ To show a full-screen product you must add the following (where context is your 
 
 #### a. Engage Only
 
-For Engage Ad network,  set the track Id(unique string) per ad. placement which will be used to check for ad. completion.
+For Engage Ad network,  set the track Id(unique string) per ad placement which will be used to check for ad completion.
 
 ```java
 
@@ -374,7 +376,7 @@ R1AdServer.getInstance(context).playVideo(adUnitIds);
 ```
 #### b. Engage With Mediation
 
-If mediation is turned on, add the ad. placement keys to the bundle and pass it along when showing the ad type. Some ad. networks support particular ad types. If the ad network does not support particular ad type or you have not create placement key then don't insert in the bundle.
+If mediation is turned on, add the ad placement keys to the bundle and pass it along when showing the ad type. Some ad networks support particular ad types. If the ad network does not support particular ad type or you have not create placement key then don't insert in the bundle.
 
 ```java
 
@@ -433,7 +435,7 @@ adUnitBannerIds.putString(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");
 R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANNER_320_50, adUnitBannerIds);
               
   ```    
-  where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programatically or in xml layout of the view hirarchy.    
+  where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programmatically or in xml layout of the view hierarchy.    
 ```java
 <FrameLayout
  android:layout_width="match_parent"
@@ -442,7 +444,7 @@ R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANN
                  
   ``` 
 #### b. Engage with Ad Mediation 
-To add a banner when ad. mediation is enabled. Get the placement Ids for all the ads from ad networks.
+To add a banner when ad mediation is enabled. Get the placement Ids for all the ads from ad networks.
 ```java
  Bundle adUnitBannerIds = new Bundle();
  adUnitBannerIds.putString(AdServer.ADAPTER_ADMOB,  "Add Admob placement Id for Banner if available"); // if 	  mediation is turned on and Admob SDK is integrated);
@@ -451,7 +453,7 @@ adUnitBannerIds.putString(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");
 R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANNER_320_50, adUnitBannerIds);
               
   ```    
-  where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programatically or in xml layout of the view hirarchy.    
+  where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programmatically or in xml layout of the view hierarchy.    
 ```java
 <FrameLayout
  android:layout_width="match_parent"
@@ -460,7 +462,7 @@ R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANN
                  
   ```                  
 
-### iii.  Ad. listener events.
+### iii.  Ad listener events
 You can listen to panels using the R1EngageNotifier object. Add it before the start of any full-screen product or banner:
 
 Import the header file
@@ -468,7 +470,7 @@ Import the header file
 import com.radiumone.engage.publisher.R1EngageNotifier;
 ```
 
-Add r1engageNotifier listener which will listen to ad events.
+Add r1engageNotifier listener that will listen to ad events.
 
 Here is an example:
 
@@ -506,15 +508,38 @@ R1AdServer.getInstance(this).setR1EngageNotifier(r1engageNotifier);
 
 **didAdReceiveNewReward** - This method is invoked when Engage offer is completed. Since each offer has its own virtual currency, it will be pass down to this method after its completion.
 
-**didAdClosed** - This method is invoked when the ad. is closed and control is back to main application.
+**didAdClosed** - This method is invoked when the ad is closed and control is back to main application.
 
-**didAdHasOffers** - This method is invoked when ad. with offers is loaded. The ad Network name is passed to this method which loads up the ad. 
+**didAdHasOffers** - This method is invoked when ad with offers is loaded. The ad Network name is passed to this method which loads up the ad. 
 
 **didAdError** - This method is invoked when ad network fails to load the ad.
 
 **didAdHasNoOffers** - This method is invoked when no ad network is available to fill the ad.
 
+### iv. Ad Check Completion
 
+Import the header file. 
+
+```java
+import com.radiumone.engage.publisher.R1CheckAdCompletion;
+```
+
+Add check Completion listener. This listener will listen to the completed events when checkCompletion method is invoked.
+```java
+ R1AdServer.getInstance(this).setCheckCompletion(new R1CheckAdCompletion() {
+            @Override
+            public void getCompletedTrackIds(ArrayList<String> completedList) {
+
+            }
+        });
+```
+
+Invoke the checkCompletion method to get the completed Ad trackIds.
+
+```java
+ R1AdServer.getInstance(this).checkCompletions(this);
+ ```
+ 
 ##b. Analytics Activation
 ### i. Automatic Events
 
@@ -769,13 +794,13 @@ R1Emitter.getInstance().emitEvent("Your custom event name", parameters);
 
 ###iv. Best Practices
 ####Event Naming Convention
-One common mistake is to parametrize event names (with user data for example). Event names should be hard-coded values that you use to segement data on a specific category of event. 
+One common mistake is to parameterize event names (with user data for example). Event names should be hard-coded values that you use to segment data on a specific category of event. 
 
 Example: "ProfileViewing"
 
 Avoid: "Profile Viewing - Lady Gaga's profile"
 
-As you may have thousands of user profiles in your database, it is preferable to keep the event name high level ("ProfileViewing") so you can run interesting anaytics on it. A high level event name will help answer a question like: How many profiles does a user visit every day on average? 
+As you may have thousands of user profiles in your database, it is preferable to keep the event name high-level ("ProfileViewing") so you can run interesting analytics on it. A high-level event name will help answer a question like: How many profiles does a user visit every day on average? 
 
 ####Parameter Variance
 
@@ -981,7 +1006,7 @@ This doc assumes you have already set up Google Play Services in your applicatio
 
 ####Configuring your App for GCM
 ######Obtain an API key from Google
-In order to use RadiumOne Connect with your application you will need an API key from Google. We will summarize those steps here, but for more info on this process please visit “GCM Getting Started” [here](http://developer.android.com/google/gcm/gs.html).
+In order to use RadiumOne Connect with your application you will need an API key from Google. We will summarize those steps here, but for more info on this process please visit “GCM Getting Started” here (http://developer.android.com/google/gcm/gs.html).
 
 1\. Create a Google API project in Google APIs Console (take note of your project number which is the value after #project: it will be used later as your GCM sender ID)
 
