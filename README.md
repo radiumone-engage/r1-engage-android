@@ -59,6 +59,38 @@ dependencies {
 }
 ```
 
+### i. Ad Mediation Setup - Import Adapters libraries and initialize third party SDKs 
+
+**Adding Admob SDK and its adapter**
+
+Make sure you have your account setup in Admob website and have created all the ad placements required by your application. Admob SDK is supported by Google play services. So it doest not require you to download the SDK. Add the proper version of Google play services in build.gradle as explained above. 
+
+Here is the startup guide for Admob Integration
+
+https://developers.google.com/mobile-ads-sdk/docs/admob/android/quick-start
+
+
+As explained in Admob Quick start guide, add the Ad view Activity in the manifest.
+```java
+<activity android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent" />
+```
+
+Don't add the **com.google.android.gms.ads.AdView** in the resource file as mentioned in the guide.
+
+
+Add the AdmobAdapter.jar library to the libs directory and refer it to your application.
+
+
+**Adding Mopub SDK and its adapter**
+
+Make sure you have your mopub account setup in Mopub website and have created all the ad placements required by your application. Here is the link to integrate Mopub SDK with your application,
+
+https://github.com/mopub/mopub-android-sdk/wiki/Getting-Started
+
+After integrating Mopub SDK with your application, add the MopubAdapter.jar library to the libs directory and refer it to your application.
+
 
 ##b. Initialize the SDK
 
@@ -70,6 +102,24 @@ Add Google Play Services to the application manifest:
 	android:value="@integer/google_play_services_version" />
 ```
 
+In the top level activity of your application, initialize the R1Emitter with the Application Context in onCreate() method.
+
+```java
+package com.example.yourpackagename; 
+import com.radiumone.emitter.R1Emitter; 
+import android.app.Application;
+
+public class TopLevelActivity extends Activity{
+@Override
+	public void onCreate() {
+		super.onCreate();
+		R1Emitter.getInstance().connect(getApplicationContext()); 
+	}
+}
+```
+
+i. **Initializing when Engage Enabled**  
+
 Add R1Publisher activity in AndroidManifest.xml
 
 ```java
@@ -78,32 +128,18 @@ Add R1Publisher activity in AndroidManifest.xml
 	android:windowSoftInputMode="stateHidden" 
 	android:configChanges="orientation|keyboardHidden|screenSize"/>
 ```
-
-Create a class that extends the Application class (or use an existing one), and initialize the SDK in its onCreate method. 
-
+Override onDestroy method for the activities which show Ads. 
 ```java
-package com.example.yourpackagename; 
-import com.radiumone.emitter.R1Emitter; 
-import android.app.Application;
 
-public class TestApplication extends Application{
 @Override
-	public void onCreate() {
-		super.onCreate();
-		R1Emitter.getInstance().connect(this); 
-	}
+protected void onDestroy() {
+	super.onDestroy();
+	R1AdServer.getInstance().onDestroy(this);
 }
 ```
+ii. **Initializing when Analytics Enabled**  
 
-Optional: If you are enabling Analytics SDK in Engage then 
-
-i. Import the emitter in all your application activities:
-
-```java
-import com.radiumone.emitter.R1Emitter;
-```
-
-ii. Override onStart and onStop methods for each activity:
+ Override onStart and onStop methods for each activity:
 
 ```java
 @Override
@@ -118,12 +154,22 @@ protected void onStop() {
 	R1Emitter.getInstance().onStop(this);
 }
 ```
+Set the user Id with your own user Id. It can be a social network id like Facebook, Google, Twitter or unique user Id.
 
+```java
+R1AdServer.getInstance(this).setUserId("< User ID>"); 
+```
 
 ##c. Adding R1Connect.properties
 
 To configure how the library will be used in your project you will need to create a file called r1connect.properties in the assets directory of your project.
+
 <img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image2.png"/></img>
+
+If you are using Android studio, assets directory resides in Application/src/main.
+
+Here is the list of ids that has to be specified in r1connect.properties
+
 
 ```ruby
 
@@ -141,6 +187,9 @@ geofencing.enable=true
 
 # default value for engage when application starts  — set to false to use SDK without engage
 engage.enable=true
+
+# defalut value is set to false for engage mediation when application start -  set to true to use SDK with mediation
+mediation.enable = true
 
 #allow location tracking by gps
 analytics.enable_gps=false
@@ -167,6 +216,8 @@ As you can see in the example above, it will contain the following:
 • 	analytics.enable - set to "true" enables analytics in Engage SDK and otherwise disables it.
 
 • 	engage.enable – when set to “true” it enables the use of Engage SDK and when set to “false” is disabled.
+
+•       mediation.enable - when set to "true" it enables ad mediation. The sdk mediates among selected ad networks to serve the best possible ad. When set to false it disables ad mediation and fetch the ad from Engage network.
 
 • 	push.client_key – You will need to enter the App Key you received when creating your app on R1 Connect (found under Dev Tools -> Keys & Secrets).
 
@@ -213,15 +264,20 @@ Properly declare your application class:
 Prior to showing ads you can add these optional parameters in the code:
 
 ```java
-R1Engage.getInstance(this).setTrackId("<Optional Track ID>");
-R1Engage.getInstance(this).setUserId("<Optional User ID>"); 
+R1AdServer.getInstance(this).setAge("<Optional Age>"); 
+```
+
+```java
+R1AdServer.getInstance(this).setGender("<Optional Gender>"); 
 ```
 
 where:
 
-**```<Optional User ID>```** is your own user ID (if you remove the line we’ll use Advertising ID or ANDROID_ID if Advertising ID is not available)
+**```<Optional Age>```** is user's age 
 
-**```<Optional Track ID>```** is a custom value for your own tracking needs (we will save and return back up to 100 characters of it).
+**```<Optional Gender>```** is user's gender
+
+This parametes are helpful  to serve more finely targeted ads.
 
 
 
@@ -282,142 +338,181 @@ To avoid issues after obfuscating, you must add the following lines to your prog
 
 ##a. Engage Activation
 
+
 ### i.  Integration of Offerwall, Interstitial and Video
 
+
+Import the following header files.
+```java
+import com.radiumone.engage.advertiser.R1AdvertiserClient;
+import com.radiumone.engage.mediation.R1AdServer;
+```
 To show a full-screen product you must add the following (where context is your Activity):
 
+#### a. Engage Only
+
+For Engage Ad network,  set the track Id(unique string) per ad. placement which will be used to check for ad. completion.
+
 ```java
-R1Engage.getInstance(context).showOfferwall(context); 
-R1Engage.getInstance(context).showInterstitial(context); 
-R1Engage.getInstance(context).playVideo(context);
+
+Bundle adUnitIds = new Bundle();
+adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Engage Track Id for Offerwall"); // can be any unique string to track if offerwall ad  completion served by Engage.
+
+R1AdServer.getInstance(context).showOfferwall(adUnitIds); 
+
+
+Bundle adUnitIds = new Bundle();
+adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
+
+
+R1AdServer.getInstance(context).showInterstitial(adUnitIds); 
+
+Bundle adUnitIds = new Bundle();
+adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
+
+R1AdServer.getInstance(context).playVideo(adUnitIds);
+```
+#### b. Engage With Mediation
+
+If mediation is turned on, add the ad. placement keys to the bundle and pass it along when showing the ad type. Some ad. networks support particular ad types. If the ad network does not support particular ad type or you have not create placement key then don't insert in the bundle.
+
+```java
+
+Bundle adUnitIds = new Bundle();
+adUnitIds.put(R1AdServer.ADAPTER_ADMOB, "Add Admob placement Id for Offerwall if available"); // if mediation is turned on and Admob SDK is integrated
+adUnitIds.put(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Offerwall if available");  // if mediation is turned on and Mopub SDK is integrated
+adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Engage Track Id for Offerwall"); // can be any unique string to track if offerwall ad  completion served by Engage.
+
+R1AdServer.getInstance(context).showOfferwall(adUnitIds); 
+
+
+Bundle adUnitIds = new Bundle();
+adUnitIds.put(R1AdServer.ADAPTER_ADMOB, "Add Admob placement Id for Interstitial if available"); // if mediation is turned on and Admob SDK is integrated
+adUnitIds.put(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Interstitial if available");  // if mediation is turned on and Mopub SDK is integrated
+adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
+
+
+R1AdServer.getInstance(context).showInterstitial(adUnitIds); 
+
+Bundle adUnitIds = new Bundle();
+adUnitIds.put(R1AdServer.ADAPTER_ADMOB, "Add Admob placement Id for Video if available");  // if mediation is turned on and Admob SDK is integrated
+adUnitIds.put(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Video if available");  // if mediation is turned on and Mopub SDK is integrated
+adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
+
+R1AdServer.getInstance(context).playVideo(adUnitIds);
 ```
 
+### ii.  Integration of Banner
+
+Import the following header files that integrates banners
+
+```java
+import com.radiumone.engage.mediation.R1AdServer;
+import com.radiumone.engage.publisher.R1EngageBannerSize;
+import com.radiumone.engage.publisher.R1EngageBannerView;
+
+```
+
+The SDK supports several predefined banner types:
+
+```ruby
+R1EngageBannerSize.BANNER_300_50
+R1EngageBannerSize.BANNER_320_50
+R1EngageBannerSize.BANNER_300_250
+R1EngageBannerSize.BANNER_480_50
+R1EngageBannerSize.BANNER_728_90
+R1EngageBannerSize.BANNER_1024_90
+```
+
+#### a. Engage Only 
+
+To add a banner of a predefined type you must add the following (where type is a predefined value from the above list):
+```java
+ Bundle adUnitBannerIds = new Bundle();
+adUnitBannerIds.putString(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track  banner ad  completion served by Engage.
+R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANNER_320_50, adUnitBannerIds);
+              
+  ```    
+  where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programatically or in xml layout of the view hirarchy.    
+```java
+<FrameLayout
+ android:layout_width="match_parent"
+ android:layout_height="wrap_content"
+ android:id="@+id/banner_container"/>
+                 
+  ``` 
+#### b. Engage with Ad Mediation 
+To add a banner when ad. mediation is enabled. Get the placement Ids for all the ads from ad networks.
+```java
+ Bundle adUnitBannerIds = new Bundle();
+ adUnitBannerIds.putString(AdServer.ADAPTER_ADMOB,  "Add Admob placement Id for Banner if available"); // if 	  mediation is turned on and Admob SDK is integrated);
+ adUnitBannerIds.putString(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Banner if available"); // if mediation is turned on and Mopub SDK is integrated);
+adUnitBannerIds.putString(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track  banner ad  completion served by Engage.
+R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANNER_320_50, adUnitBannerIds);
+              
+  ```    
+  where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programatically or in xml layout of the view hirarchy.    
+```java
+<FrameLayout
+ android:layout_width="match_parent"
+ android:layout_height="wrap_content"
+ android:id="@+id/banner_container"/>
+                 
+  ```                  
+
+### iii.  Ad. listener events.
 You can listen to panels using the R1EngageNotifier object. Add it before the start of any full-screen product or banner:
 
+Import the header file
 ```java
-R1Engage.getInstance(this).setR1EngageNotifier(r1engageNotifier);
+import com.radiumone.engage.publisher.R1EngageNotifier;
 ```
+
+Add r1engageNotifier listener which will listen to ad events.
 
 Here is an example:
 
 ```java
-	private R1EngageNotifier r1engageNotifier = new R1EngageNotifier() {
-		
-		@Override
-		public void didReceiveNewReward(int arg0) {
-			
-		    switch (arg0){
-		      case R1EngageNotifier.HAS_OFFERS:
-		    	  System.out.println("Has offers");
-		        break;
-		      case R1EngageNotifier.NO_OFFERS:
-		    	  System.out.println("No offers");
+private R1EngageNotifier r1engageNotifier = new R1EngageNotifier() {
+        @Override
+        public void didAdReceiveNewReward(int rewards) {
+           
+        }
 
-		        break;
-		      case R1EngageNotifier.ERROR:
-		    	  System.out.println("Error");
+        @Override
+        public void didAdClosed() {
+            Toast.makeText(R1EngageDemo.this, "Closed", Toast.LENGTH_SHORT).show();
+        }
 
-		    break; }
-			
-		}
-		
-		@Override
-		public void didLoaded(int arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		public void didClosed() {
-			// TODO Auto-generated method stub
-			
-		}
-	};
+        @Override
+        public void didAdHasOffers(final String adNetwork) {
+            
+
+        }
+
+        @Override
+        public void didAdError() {
+              }
+
+        @Override
+        public void didAdHasNoOffers() {
+             }
+    };
 ```
-
-### ii. Integration of Banner
-The SDK supports several predefined banner types:
-
-```ruby
-R1EngageBannerView.BANNER_300_50
-R1EngageBannerView.BANNER_320_50
-R1EngageBannerView.BANNER_300_250
-R1EngageBannerView.BANNER_480_50
-R1EngageBannerView.BANNER_728_90
-R1EngageBannerView.BANNER_1024_90
-R1EngageBannerView.BANNER_FULLSCREEN
-```
-
-To add a banner of a predefined type you must add the following (where type is a predefined value from the above list):
-
-    bannerView = R1Engage.getInstance(this).getBannerView(this, type);
-    
-To add a banner with custom size add the following:
-
-    bannerView = R1Engage.getInstance(this).getBannerView(this, 320, 50);
-
-You must store the link for bannerView and call onPause and onResume methods of the bannerView in your activity:
 
 ```java
-@Override
-  protected void onResume() {
-    super.onResume();
-    if ( bannerView != null ){
-      bannerView.onResume();
-    }
-}
-  @Override
-  protected void onPause() {
-    super.onPause();
-    if ( bannerView != null ){
-      bannerView.onPause();
-    }
-}
+R1AdServer.getInstance(this).setR1EngageNotifier(r1engageNotifier);
 ```
 
-Add the bannerView in your view hierarchy:
+**didAdReceiveNewReward** - This method is invoked when Engage offer is completed. Since each offer has its own virtual currency, it will be pass down to this method after its completion.
 
-```java
-((ViewGroup)findViewById(R.id.root)).addView(bannerView);
-```
+**didAdClosed** - This method is invoked when the ad. is closed and control is back to main application.
 
-Call method loadAd():
+**didAdHasOffers** - This method is invoked when ad. with offers is loaded. The ad Network name is passed to this method which loads up the ad. 
 
-```java
-bannerView.loadAd();
-```
+**didAdError** - This method is invoked when ad network fails to load the ad.
 
-Checking rewards information
-
-If you want to listen for rewards notifications from an offer completion, you must register a listener. To do this create the R1EngageNotifier object:
-
-```java
-private R1EngageNotifier rewardNotifier = new R1EngageNotifier() {
-@Override
-public void didReceiveNewReward(final int rewards) {
-    lastReward = rewards;
-  @Override
-  public void didLoaded(int code){
-  }
-  @Override
-
-public void didClosed() {
-} };
-```
-
-Add it before the start of any full-screen product or Banner:
-
-```java
-R1Engage.getInstance(this).setR1EngageNotifier(rewardNotifier);
-```
-
-If you want to check the status of offer completions, call: 
-
-```java
-R1Engage.getInstance(context).checkCompletions(context);
-```
-
-For example, you can call this method when the application starts.
+**didAdHasNoOffers** - This method is invoked when no ad network is available to fill the ad.
 
 
 ##b. Analytics Activation
