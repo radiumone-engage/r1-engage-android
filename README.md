@@ -8,19 +8,23 @@
 	- [e. Advance Settings](#user-content-e—advance-settings)
 - [3. Feature Activation](#user-content-3-feature-activation)
 	- [a. Engage Activation](#user-content-a-engage-activation)
-		- [i. Integration of Offerwall, Interstitial and Video](#user-content-i-integration-of-offerwall-,-interstitial-and-video)
-		- [ii. Integration of Banner](#user-content-ii-integration-of-banner)
-		- [iii. Ad listener events](#user-content-iii-ad-listener-events)
-		- [iv. Ad Check Completion](#user-content-iv-ad-check-completion)
+		- [i. Ad Mediation SDKs Setup (Optional)](#user-content-i-ad-mediation-sdks-setup)
+		- [ii. Integration of Offerwall, Interstitial and Video](#user-content-ii-integration-of-offerwall-,-interstitial-and-video)
+		- [iii. Integration of Banner](#user-content-iii-integration-of-banner)
+		- [iv. Ad listener events](#user-content-iv-ad-listener-events)
+		- [v. Ad Check Completion](#user-content-v-ad-check-completion)
 	- [b. Analytics Activation](#user-content-b-analytics-activation)
 		- [i. Automatic Events](#user-content-i-automatic-events)
 		- [ii. Standard Events](#user-content-ii-standard-events)
 		- [iii. Custom Events](#user-content-iii-custom-events)
 		- [iv. Best Practices](#user-content-iv-best-practices)
 	- [c. Push Notification Activation](#user-content-c-push-notification-activation)
-		- [i. Initialization](#user-content-i-initialization)
-		- [ii. Setup Google Cloud Messaging](#user-content-ii-setup-google-cloud-messaging)
-		- [iii. Segment your Audience](#user-content-iii-segment-your-audience)
+	 	- [i. Setup Google Cloud Messaging](#user-content-i-setup-google-cloud-messaging)
+		- [ii. Initialization](#user-content-ii-initialization)
+		- [iii. Rich Push Initialization](#user-content-iii-rich-push-initialization)
+		- [iv. Rich Push Customization](#user-content-iv-rich-push-customization)
+		- [v. Deep Link Initialization](#user-content-v-deep-link-initialization)
+		- [vi. Segment your Audience](#user-content-vi-segment-your-audience)
 	- [d. Attribution Tracking Activation](#user-content-d-attribution-tracking-activation)
 		- [i. Track RadiumOne Campaigns](#user-content-i-track-radiumone-campaigns)
 		- [ii. Track 3rd party Campaigns](#user-content-ii-track-3rd-party-campaigns)
@@ -60,38 +64,6 @@ dependencies {
    compile ‘com.google.android.gms:play-services:4.3.+'
 }
 ```
-
-### i. Ad Mediation Setup - Import Adapters libraries and initialize third party SDKs 
-
-**Adding Admob SDK and its adapter**
-
-Make sure you have your account setup in Admob website and have created all the ad placements required by your application. Admob SDK is supported by Google play services. So it does not require you to download the SDK. Add the proper version of Google play services in build.gradle as explained above. 
-
-Here is the startup guide for Admob Integration
-
-https://developers.google.com/mobile-ads-sdk/docs/admob/android/quick-start
-
-
-As explained in Admob Quick start guide, add the Ad view Activity in the manifest.
-```java
-<activity android:name="com.google.android.gms.ads.AdActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:theme="@android:style/Theme.Translucent" />
-```
-
-Don't add the **com.google.android.gms.ads.AdView** in the resource file as mentioned in the guide.
-
-
-Add the AdmobAdapter.jar library to the libs directory and refer it to your application.
-
-
-**Adding Mopub SDK and its adapter**
-
-Make sure you have your Mopub account setup in Mopub website and have created all the ad placements required by your application. Here is the link to integrate Mopub SDK with your application,
-
-https://github.com/mopub/mopub-android-sdk/wiki/Getting-Started
-
-After integrating Mopub SDK with your application, add the MopubAdapter.jar library to the libs directory and refer it to your application.
 
 
 ##b. Initialize the SDK
@@ -340,8 +312,41 @@ To avoid issues after obfuscating, you must add the following lines to your prog
 
 ##a. Engage Activation
 
+### i. Ad Mediation SDKs Setup 
 
-### i.  Integration of Offerwall, Interstitial and Video
+**Adding Admob SDK and its adapter**
+
+Make sure you have your account setup in Admob website and have created all the ad placements required by your application. Admob SDK is supported by Google play services. So it does not require you to download the SDK. Add the proper version of Google play services in build.gradle as explained above. 
+
+Here is the startup guide for Admob Integration
+
+https://developers.google.com/mobile-ads-sdk/docs/admob/android/quick-start
+
+
+As explained in Admob Quick start guide, add the Ad view Activity in the manifest.
+```java
+<activity android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent" />
+```
+
+Don't add the **com.google.android.gms.ads.AdView** in the resource file as mentioned in the guide.
+
+
+Add the AdmobAdapter.jar library to the libs directory and refer it to your application.
+
+
+**Adding Mopub SDK and its adapter**
+
+Make sure you have your Mopub account setup in Mopub website and have created all the ad placements required by your application. Here is the link to integrate Mopub SDK with your application,
+
+https://github.com/mopub/mopub-android-sdk/wiki/Getting-Started
+
+After integrating Mopub SDK with your application, add the MopubAdapter.jar library to the libs directory and refer it to your application.
+
+
+
+### ii.  Integration of Offerwall, Interstitial and Video
 
 
 Import the following header files.
@@ -404,7 +409,7 @@ adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be 
 R1AdServer.getInstance(context).playVideo(adUnitIds);
 ```
 
-### ii.  Integration of Banner
+### iii.  Integration of Banner
 
 Import the following header files that integrates banners
 
@@ -462,7 +467,7 @@ R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANN
                  
   ```                  
 
-### iii.  Ad listener events
+### iv.  Ad listener events
 You can listen to panels using the R1EngageNotifier object. Add it before the start of any full-screen product or banner:
 
 Import the header file
@@ -516,7 +521,7 @@ R1AdServer.getInstance(this).setR1EngageNotifier(r1engageNotifier);
 
 **didAdHasNoOffers** - This method is invoked when no ad network is available to fill the ad.
 
-### iv. Ad Check Completion
+### v. Ad Check Completion
 
 Import the header file. 
 
@@ -832,7 +837,48 @@ This will enable you to create more insightful reports.
 
 ##c. Push Notification Activation
 
-###i. Initialization
+###i. Setup Google Cloud Messaging
+
+####Prerequisites for Google Cloud Messaging Setup
+This doc assumes you have already set up Google Play Services in your application project. Google Play Services is needed to use Google Cloud Messaging (GCM), the notification gateway RadiumOne Connect will use for your Android app. Also if you have not done so already, you will need to add the app you will be using to the RadiumOne Connect portal in order to add the Google API Key to it once you have generated the API Key following the steps below.
+
+####Configuring your App for GCM
+######Obtain an API key from Google
+In order to use RadiumOne Connect with your application you will need an API key from Google. We will summarize those steps here, but for more info on this process please visit “GCM Getting Started” [here](http://developer.android.com/google/gcm/gs.html).
+
+1\. Create a Google API project in Google APIs Console (take note of your project number which is the value after #project: it will be used later as your GCM sender ID)
+
+<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image101.jpg"></img>
+
+2\. Enable the GCM Service
+
+<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image102.jpg"></img>
+
+3\. Create a new Server key in the Google APIs Console page under API Access. when prompted, allow access to ip 0.0.0.0/0 
+
+<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image103.jpg"></img>
+
+<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image104.jpg"></img>
+
+4\. Copy the key, it is used for GCM Connection Servers and for RadiumOne Connect setup
+
+######Setting up the API Key on R1 Connect
+
+1\. Please make sure you are signed into your account on RadiumOne Connect and go to the application you want to add this API key to.
+
+2\. Next, in the side menu go to Dev Tools > Push Services > Google Cloud Messaging.
+
+<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image105.jpg"></img>
+
+3\. Add your API Key to the API Key field and click Save.
+
+<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image106.jpg"></img>
+
+If it saved correctly you will see a green badge with a white checkmark in it. Now your app is setup with GCM.
+
+
+
+###ii. Initialization
 
 To make sure push notifications work correctly, please follow these steps:
 
@@ -840,10 +886,10 @@ Configure the r1connect.properties file in your project:
 
 • push.sender_id – You will need to enter the project number you received when creating your Google API project.
 
-• push.enable – This defaults to “true” and will enable or disable push notifications after you start your application.
+• push.enable – This defaults to “true” and will enable or disable push notifications after you start your application
 
 
-Create a class that inherits from the class Application (or you can use an existing one in the project):
+Create a class that inherits from the class Application (or you can use an existing one in the project)
 
 To enable an action such as opening the app when a notification is clicked, create a class that inherits from BroadcastReceiver and add the necessary logic to it. If you are okay with the default, which closes the notification upon pressing it, then no further coding is required.
 
@@ -858,7 +904,7 @@ public class TestPushReceiver extends BroadcastReceiver {
                     Intent openIntent = new Intent(context, ShowNotificationActivity.class);
                     openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         if ( intent.getExtras() != null ){
-                            openIntent.putExtra("all", intent);
+                            openIntent.putExtras(intent.getExtras());
                         }
                         applicationContex.startActivity(openIntent);
                     }
@@ -869,19 +915,11 @@ public class TestPushReceiver extends BroadcastReceiver {
 }
 ```
 
-The class referred to in the first item is used in the following way:
+
+Then update the application class:
 
 ```java
-R1Emitter.getInstance().setNotificationIconResourceId(this, R.drawable.ic_launcher);
-//The above line is necessary for creating an icon in the notification bar when the device receives the notification
-R1Emitter.getInstance().setIntentReceiver(this, TestPushReceiver.class);
-//This line tells the library that the class created in step 2 will be processing the push notification
-//In TestPushReceiver (see step 2) we want to open ShowNotificationActivity when notification is clicked
-R1Emitter.getInstance().connect(this); //To make sure the library works correctly it is necessary this line in onCreate() method
-```
-
-```java
-public class R1sdkApplication extends Application{
+public class MyApplication extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
@@ -894,7 +932,19 @@ public class R1sdkApplication extends Application{
 }
 ```
 
-If you want to create your own notifications you have to create a class that implements the R1NotificationBuilder interface and write your notification builder like in the example below:
+If you don't have an application class yet, create it and don't forget to reference it inside the Manifest:
+
+```java
+<!-- android:name of application tag must be full application name that was created in first step.-->
+<application
+    android:name="com.example.r1connecttestapplication.MyApplication"
+    android:allowBackup="true"
+    android:icon="@drawable/ic_launcher"
+    android:label="@string/app_name"
+    android:theme="@style/AppTheme" >
+```
+
+If you want to create your own notifications you have to create a class that implements R1NotificationBuilder interface and write your notification builder like in the example below:
 
 ```java
 public class CustomNotificationBuilder implements R1NotificationBuilder {
@@ -935,114 +985,289 @@ public class CustomNotificationBuilder implements R1NotificationBuilder {
 }
 ```
 
-Following this step, add this line just before R1Emitter.getInstance().connect(this) in your application class:
+After that add this line just before R1Emitter.getInstance().connect(this) in your application class:
 ```java
 R1Emitter.getInstance().setNotificationBuilder(new CustomNotificationBuilder());
 ```
 
+Update the manifest as shown below.
 
-Update the manifest as shown below:
+Add the following inside the application tag:
 
 ```java
-<!-- android:name of application tag must be full application name that was created in first step.-->
-<application
-    android:name="com.example.r1connecttestapplication.TestApplication"
-    android:allowBackup="true"
-    android:icon="@drawable/ic_launcher"
-    android:label="@string/app_name"
-    android:theme="@style/AppTheme" >
-    <!--the next lines are your project activities-->
-    //Then there are necessary fields for the library to work correctly (cont…):
-    <receiver android:name="com.radiumone.emitter.gcm.R1GCMPushReceiver" android:exported="true"
-              android:permission="com.google.android.c2dm.permission.SEND" >
-        <intent-filter>
-            <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-            <!-- name must be your applicationPackage -->
-            <category android:name="com.radiumone.sdk" />
-        </intent-filter>
-    </receiver>
-    <receiver android:name="com.radiumone.emitter.push.R1PushBroadcastReceiver"
-              android:exported="false">
-        <intent-filter>
-            <action android:name="com.radiumone.r1push.OPENED_INTERNAL"/>
-        </intent-filter>
-    </receiver>
-    <service android:name="com.radiumone.emitter.push.R1ConnectService"/>
-    <service android:name="com.radiumone.emitter.location.LocationService"/>
-    //Using the class created in Step 2 (cont…):
-    <receiver android:name=".testpush.TestPushReceiver"
-              android:exported="false">
-        <intent-filter>
-            <action android:name="com.radiumone.r1push.OPENED"/>
-        </intent-filter>
-    </receiver>
+<!-- PUSH -->
+<receiver android:name="com.radiumone.emitter.gcm.R1GCMPushReceiver" android:exported="true"
+      android:permission="com.google.android.c2dm.permission.SEND" >
+<intent-filter>
+    <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+    <!-- name must be your applicationPackage -->
+    <category android:name="###YOUR APPLICATION PACKAGE###" />
+</intent-filter>
+</receiver>
+<receiver android:name="com.radiumone.emitter.push.R1PushBroadcastReceiver"
+      android:exported="false">
+<intent-filter>
+    <action android:name="com.radiumone.r1push.OPENED_INTERNAL"/>
+</intent-filter>
+</receiver>
+<service android:name="com.radiumone.emitter.push.R1ConnectService"/>
+<service android:name="com.radiumone.emitter.location.LocationService"/>
+//Using the class created in Step 2 (cont…):
+<receiver android:name=".testpush.TestPushReceiver"
+      android:exported="false">
+<intent-filter>
+    <action android:name="com.radiumone.r1push.OPENED"/>
+</intent-filter>
+</receiver>
 
-    <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+<meta-data
+    android:name="com.google.android.gms.version"
+    android:value="@integer/google_play_services_version" />
+<!-- END OF PUSH -->
+```
+Add the following  inside the manifest tag:
 
-</application>
-//Permissions that are necessary for the library to work:
+```java
+<!-- PUSH -->
+<!-- Permissions that are necessary for the library to work: -->
 <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-//Permission to get location when using the network
+<!-- Permission to get location when using the network -->
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-//Permission to get location when using GPS
+<!-- Permission to get location when using GPS --> 
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
 <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 <uses-permission android:name="android.permission.VIBRATE"/>
-<!--(your_application_package).permission.C2D_MESSAGE -->
-<permission android:name="com.radiumone.sdk.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
-<uses-permission android:name="com.radiumone.sdk.permission.C2D_MESSAGE"></uses-permission>
+<permission android:name="###YOUR APPLICATION PACKAGE###.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
+<uses-permission android:name="###YOUR APPLICATION PACKAGE###.permission.C2D_MESSAGE"></uses-permission>
+<!-- END OF PUSH -->
 ```
 
 
-###ii. Setup Google Cloud Messaging
+###iii. Rich Push Initialization
 
-####Prerequisites for Google Cloud Messaging Setup
-This doc assumes you have already set up Google Play Services in your application project. Google Play Services is needed to use Google Cloud Messaging (GCM), the notification gateway RadiumOne Connect will use for your Android app. Also if you have not done so already, you will need to add the app you will be using to the RadiumOne Connect portal in order to add the Google API Key to it once you have generated the API Key following the steps below.
+Rich push notifications send a URL that opens upon user response to a system notification.  In addition to the general push setup requirements, if you would like to enable rich push notifications that include HTML/CSS/JavaScript you have to add the following data in the AndroidManifest.xml:
 
-####Configuring your App for GCM
-######Obtain an API key from Google
-In order to use RadiumOne Connect with your application you will need an API key from Google. We will summarize those steps here, but for more info on this process please visit “GCM Getting Started” here (http://developer.android.com/google/gcm/gs.html).
+```java
+<service android:name="com.radiumone.emitter.richpush.R1RichPushService" />
+<activity
+        android:name="com.radiumone.emitter.richpush.activity.R1RichPushActivity"
+        android:configChanges="orientation|keyboardHidden|screenSize"
+        android:label="@string/title_activity_rich_push"
+        android:launchMode="singleTask"
+        android:parentActivityName=".MainActivity"
+        android:theme="@style/AppThemeCustomNoTitle"
+        android:windowSoftInputMode="stateHidden">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".MainActivity" />
+</activity>
+```
 
-1\. Create a Google API project in Google APIs Console (take note of your project number which is the value after #project: it will be used later as your GCM sender ID)
+The parent activity for rich activity is the view accessed when selecting the back button.  Older platforms may require the meta-data attributes above.
 
-<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image101.jpg"></img>
+@style/AppThemeCustomNoTitle is the window style.  If you would like to present the view without a title, use the following style:
 
-2\. Enable the GCM Service
+```java
+	<style name="AppThemeCustomNoTitle" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+```        
 
-<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image102.jpg"></img>
+Users that select rich push notifications will by default start com.radiumone.emitter.richpush.activity.R1RichPushActivity and start the HTML content.
 
-3\. Create a new Server key in the Google APIs Console page under API Access
+###iv. Rich Push Customization
 
-<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image103.jpg"></img>
+If you want to customize Rich Push then update your custom BroadcastReceiver ( TestPushReceiver ):
 
-<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image104.jpg"></img>
+```java
+Bundle extras = intent.getExtras();
 
-4\. Copy the key, it is used for GCM Connection Servers and for RadiumOne Connect setup
+if (extras != null) {
+        // getting rich push ID - no rich push id means that push is simple and no rich content for it
+        String richPushId = extras.getString(R1PushNotificationManager.RICH_PUSH);
+        if (TextUtils.isEmpty(richPushId)) {
+        openIntent = new Intent(applicationContext, ShowNotificationActivity.class);
+        } else {
+                openIntent = new Intent(applicationContext, R1RichPushActivity.class);
+                openIntent.putExtra(R1RichPush.R1_RICH_PUSH_ID, richPushId);
+        }
+}
 
-######Setting up the API Key on R1 Connect
+```
 
-1\. Please make sure you are signed into your account on RadiumOne Connect and go to the application you want to add this API key to.
+In this scenario, we check for rich push id in extras and start different activities for rich and regular push.
 
-2\. Next, in the side menu go to Dev Tools > Push Services > Google Cloud Messaging.
+You can change the activity for Rich Push if you want to use fragments, toolbar, or another activity that you want to use as the Rich Push Activity. See the code below:
 
-<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image105.jpg"></img>
+```java
 
-3\. Add your API Key to the API Key field and click Save.
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.ViewGroup;
 
-<img src="https://raw.github.com/radiumone/r1-connect-demo-Android/master/readme-images/image106.jpg"></img>
+import com.radiumone.emitter.richpush.R1RichPush;
+import com.radiumone.emitter.richpush.R1RichPushManager;
+import com.radiumone.emitter.richpush.R1RichPushMessage;
+import com.radiumone.emitter.richpush.R1RichPushWebView;
 
-If it saved correctly you will see a green badge with a white checkmark in it. Now your app is setup with GCM.
+public class CustomPushActivity extends Activity implements R1RichPushManager.OnMessageReceivedListener{
+
+    private String richPushId;
+    private R1RichPushWebView webView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle extras = getIntent().getExtras();
+        if ( extras == null ){
+            Log.i(CustomPushActivity.class.getSimpleName(), "Wrong parameters for " + R1RichPushActivity.class.getSimpleName());
+            finish();
+            return;
+        }
+        richPushId = extras.getString(R1RichPush.R1_RICH_PUSH_ID);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        Bundle extras = getIntent().getExtras();
+        if ( extras == null ){
+            Log.i(CustomPushActivity.class.getSimpleName(), "Wrong parameters for " + R1RichPushActivity.class.getSimpleName());
+            finish();
+            return;
+        }
+        richPushId = extras.getString(R1RichPush.R1_RICH_PUSH_ID);
+        loadRichPush();
+    }
+
+    private void loadRichPush() {
+        if (TextUtils.isEmpty(richPushId)){
+            Log.i(CustomPushActivity.class.getSimpleName(), "No rich_push_id in extras");
+            finish();
+            return;
+        }
+        R1RichPushMessage message = R1RichPushManager.getR1RichPushManager().getR1RichPushMessage(this, richPushId, this);
+        if ( message != null ) {
+            webView = new R1RichPushWebView(this);
+            webView.setLayoutParams( new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            setContentView(webView);
+            if ( message.getStatus() == R1RichPushMessage.RESULT_OK ) {
+                webView.loadR1RichPush(message);
+            } else {
+                Log.i(CustomPushActivity.class.getSimpleName(), "Error while getting rich push message");
+                finish();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if ( webView != null ){
+            webView.onPause();
+        }
+        if ( !TextUtils.isEmpty(richPushId)) {
+            R1RichPushManager.getR1RichPushManager().removeListener(richPushId, this);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if ( webView != null ){
+            webView.onResume();
+        } else {
+            loadRichPush();
+        }
+    }
+
+    @Override
+    public void onResult(R1RichPushMessage message) {
+        if ( message != null && message.getStatus() == R1RichPushMessage.RESULT_OK) {
+            if (richPushId != null && richPushId.equals(message.getId())) {
+                runOnUiThread( new Runnable() {
+                    @Override
+                    public void run() {
+                        loadRichPush();
+                    }
+                });
+            }
+        } else {
+            Log.i(CustomPushActivity.class.getSimpleName(), "No Connection while getting rich push message");
+            finish();
+        }
+    }
+
+    @Override
+    public void onError(R1RichPushMessage message) {
+        Log.i(CustomPushActivity.class.getSimpleName(), "Error while getting rich push message");
+        finish();
+    }
+}
+
+```
+
+The important line in this class is
+
+```java
+//get R1RichPushMessage from R1RichPushManager 
+R1RichPushMessage message = R1RichPushManager.getR1RichPushManager().getR1RichPushMessage(this, richPushId, this);
+```
+
+where
+
+```java
+R1RichPushManager.getR1RichPushManager().getR1RichPushMessage(Context context, String richPushId, R1RichPushManager.OnMessageReceivedListener receiveListener);
+```
+
+To make Rich Push work you have to use the following method of R1RichPushWebView:
+
+```java
+	webView.loadR1RichPush(message);
+```
+
+Next register your activity in AndroidManifest.xml (do not forget service android:name="com.radiumone.emitter.richpush.R1RichPushService"  because it necessary for both custom and default rich push activity).
+
+```java
+<service android:name="com.radiumone.emitter.richpush.R1RichPushService" />
 
 
+<activity
+            android:name="###YOUR APPLICATION PACKAGE###.CustomRichPushActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_rich_push"
+            android:launchMode="singleTask"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+```
 
-###iii. Segment your Audience    
+Then add this line just before R1Emitter.getInstance().connect(this) in your application class:
 
-You can specify Tags for *R1 Connect SDK* to send *Push Notifications* for certain groups of users.
+```java
+R1Emitter.getInstance().setRichPushActivity(CustomRichPushActivity.class);
+```
+
+Now rich push will be opened in your custom activity.
+
+
+###v. Deep Link Initialization
+
+Deep linking push messages open up a designated view in an application upon user response to a system notification.  To properly handle deep link push receipts, please read Android’s documentation on registering a custom URL scheme here:  http://developer.android.com/guide/topics/manifest/data-element.html
+ 
+
+###vi. Segment your Audience    
+
+You can specify Tags for *R1 Connect SDK* to send *Push Notifications* for certain groups of users.  You can then send *Push Notifications* to users with specific tags.
 
 The maximum length of a Tag is 128 characters.
 
@@ -1076,13 +1301,17 @@ for ( String tag: tags) {
 }
 ```
 
+***Replace all existing Tags***
+
+```java
+R1Push.getInstance(context).setTags(Arrays.asList("tag1","tag2"));
+```
+
 ***Get all Tags***
 	
 ```java
 String[] allTags = R1Push.getInstance(context).getTags(context);
 ```
-
-
 
 ##c. Attribution Tracking Activation
 ###i. Track RadiumOne Campaigns
