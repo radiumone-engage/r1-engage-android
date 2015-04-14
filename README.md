@@ -180,6 +180,8 @@ analytics.location_in_background=false
 #prevent location tracking for analytics sdk
 analytics.disable_sdk_location=false
 
+#allow installed applications tracking. Default true
+analytics.enable_apps_list=true
 
 ```
 
@@ -208,6 +210,7 @@ As you can see in the example above, it will contain the following:
 
 • 	analytics.location_in_background – set whether or not the location is allowed in analytics sdk to be sent while the app is in the background.
 
+• 	analytics.enable_apps_list – set whether or not collecting of the installed apps is enabled.  By default, this property is set to **true**.  You MUST change this to false if you do not want to collect the list of installed apps.
 
 ##d. Update the manifest
 In your manifest, add the permissions below:
