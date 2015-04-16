@@ -23,8 +23,9 @@
 		- [ii. Initialization](#user-content-ii-initialization)
 		- [iii. Rich Push Initialization](#user-content-iii-rich-push-initialization)
 		- [iv. Rich Push Customization](#user-content-iv-rich-push-customization)
-		- [v. Deep Link Initialization](#user-content-v-deep-link-initialization)
-		- [vi. Segment your Audience](#user-content-vi-segment-your-audience)
+		- [v. Inbox Initialization](#user-content-v-inbox-initialization)
+		- [vi. Deep Link Initialization](#user-content-vi-deep-link-initialization)
+		- [vii. Segment your Audience](#user-content-vii-segment-your-audience)
 	- [d. Attribution Tracking Activation](#user-content-d-attribution-tracking-activation)
 		- [i. Track RadiumOne Campaigns](#user-content-i-track-radiumone-campaigns)
 		- [ii. Track 3rd party Campaigns](#user-content-ii-track-3rd-party-campaigns)
@@ -210,7 +211,9 @@ As you can see in the example above, it will contain the following:
 
 • 	analytics.location_in_background – set whether or not the location is allowed in analytics sdk to be sent while the app is in the background.
 
-• 	analytics.enable_apps_list – set whether or not collecting of the installed apps is enabled.  By default, this property is set to **true**.  You MUST change this to false if you do not want to collect the list of installed apps.
+• 	analytics.enable_apps_list – set whether or not collecting of the installed apps is enabled.  By default, this property is set to **true**.  You MUST change this to false if you do not want to collect the list of installed apps.  You must also inform your users that you will be collecting this information in your store listing.  An example disclaimer is below:
+
+“This app facilitates the transmission of a list of installed apps on your device to a third party's server. This information will be used to provide you with advertisements that are better suited to your interests. If you do not agree to the transmission of a list of your installed apps to a third party, please do not install this app.”
 
 ##d. Update the manifest
 In your manifest, add the permissions below:
@@ -1262,13 +1265,348 @@ R1Emitter.getInstance().setRichPushActivity(CustomRichPushActivity.class);
 
 Now rich push will be opened in your custom activity.
 
+###v. Inbox Initialization
 
-###v. Deep Link Initialization
+If you want to enable inbox functionality you need to create a fragment or an activity that shows a list of Inbox messages and listen for messages updates in the Inbox. 
+This reference source code shows how to implement Activity in which you can show and delete messages from Inbox (this activity must be registered in your AndroidManifest.xml). This also assumes that Rich Push functionality mentioned above is already integrated.
+
+```java
+public class R1InboxActivity extends Activity implements R1InboxManager.OnInboxUpdateListener, AdapterView.OnItemClickListener {
+
+	// ListView for inbox messages
+    private ListView listView;
+    
+    // Adapter for showing messages in listview
+    private R1InboxMessageAdapter adapter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // creating ListView programmatically, but it can be layout from xml
+        listView = new ListView(this);
+        listView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        listView.setId(android.R.id.list);
+        
+        // creating Inbox adapter
+        adapter = new R1InboxMessageAdapter(this);
+        listView.setAdapter(adapter);
+        
+        // sets click listener for this Activity
+        listView.setOnItemClickListener(this);
+        
+        // this line is for correct working delete buttons in list
+        listView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        
+        setContentView(listView);
+    }
+
+
+	// method gets inbox messages and set to adapter for showing in list
+    private void loadMessages() {
+        final R1InboxMessage[] messages = R1InboxManager.getInboxManager().getR1InboxMessages(this);
+        runOnUiThread( new Runnable() {
+            @Override
+            public void run() {
+                if ( adapter != null ){
+                    adapter.setInboxMessages(messages);
+                }
+            }
+        });
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        
+        // remove inbox update listener when Activity goes to pause state
+        R1InboxManager.getInboxManager().setInboxUpdateListener(null);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        
+        // calls SDK onStart method
+        R1Emitter.getInstance().onStart(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStart();
+        
+        // calls SDK onStop method
+        R1Emitter.getInstance().onStop(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        // set inbox update listener when Activity resumes. After that all updates in inbox will invoke callback inboxUpdated() in this Activity
+        R1InboxManager.getInboxManager().setInboxUpdateListener(this);
+        
+        // get actual messages after pause
+        loadMessages();
+    }
+
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if ( adapter != null ) {
+        	// get R1InboxMessage object for pressed listview position
+            R1InboxMessage inboxMessage = adapter.getItem(position);
+            
+            // call inboxMessageOpen() method for correct opening and showing inbox message  
+            R1InboxManager.getInboxManager().inboxMessageOpen(this, inboxMessage);
+        }
+    }
+
+    @Override
+    public void inboxUpdated() {
+    	// get actual messages after inbox updated
+        loadMessages();
+    }
+
+    @Override
+    public void inboxUpdateError() {
+        Log.i(getClass().getSimpleName(),"Inbox update error");
+    }
+
+
+	// adapter for showing Inbox messages
+    private class R1InboxMessageAdapter extends BaseAdapter {
+
+        private final LayoutInflater inflater;
+        
+        // array of R1InboxMessage
+        private R1InboxMessage[] listOfMessages;
+
+        public R1InboxMessageAdapter(Context context){
+            listOfMessages = new R1InboxMessage[0];
+            inflater = (LayoutInflater)context.getSystemService(LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+        public int getCount() {
+            if ( listOfMessages == null ){
+                return 0;
+            }
+            return listOfMessages.length;
+        }
+
+        @Override
+        public R1InboxMessage getItem(int position) {
+            return listOfMessages[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = convertView;
+            ViewHolder viewHolder = null;
+            if (view == null) {
+            
+            	// Layout for inbox item. Will be shown further.
+                view = inflater.inflate(R.layout.r1_inbox_item, null);
+                viewHolder = new ViewHolder();
+                viewHolder.alert = (TextView)view.findViewById(R.id.alert);
+                viewHolder.title = (TextView)view.findViewById(R.id.title);
+                viewHolder.dateTime = (TextView)view.findViewById(R.id.datetime);
+                viewHolder.readIndicator = view.findViewById(R.id.read_indicator);
+
+                viewHolder.delete = (Button)view.findViewById(R.id.delete_button);
+                
+                // set OnClickListener for delete button
+                viewHolder.delete.setOnClickListener( new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                    	// if tag for pressed button is an instance of R1InboxMessage you have to call inboxMessageDelete method in R1InboxManager for correct deletion of message
+                        Object tag = v.getTag();
+                        if ( tag instanceof R1InboxMessage ) {
+                            R1InboxManager.getInboxManager().inboxMessageDelete(R1InboxActivity.this, (R1InboxMessage) tag);
+                        }
+                    }
+                });
+                view.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder)view.getTag();
+            }
+
+            R1InboxMessage message = getItem(position);
+
+			// set Tag for delete button. This needs for knowing what message must be deleted after button pressed.
+            viewHolder.delete.setTag(message);
+            
+            viewHolder.alert.setText(message.getAlert());
+            
+            viewHolder.title.setText(message.getTitle());
+            
+            viewHolder.dateTime.setText( dateTimeLocalised( message.getDateTime() ));
+
+			// checks that message is not readed and show it 
+            if ( message.getReadState() == R1RichPushMessage.READ ){
+                viewHolder.readIndicator.setVisibility(View.INVISIBLE);
+            } else {
+                viewHolder.readIndicator.setVisibility(View.VISIBLE);
+            }
+
+            return view;
+        }
+
+        public void setInboxMessages(R1InboxMessage[] inboxMessages){
+            this.listOfMessages = inboxMessages;
+            notifyDataSetChanged();
+        }
+    }
+
+    private static class ViewHolder {
+        TextView title;
+        TextView alert;
+        TextView dateTime;
+        Button delete;
+        View readIndicator;
+    }
+
+    private String dateTimeLocalised(long dateTime){
+        dateTime -= TimeZone.getDefault().getOffset(dateTime);
+        return DateFormat.getDateTimeInstance().format(dateTime);
+    }
+
+}
+```
+
+Layout R.layout.r1_inbox_item.xml from source code above:
+
+```java
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="?listPreferredItemHeight"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <View
+        android:id="@+id/read_indicator"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="8dp"
+        android:background="@drawable/shape" />
+
+    <LinearLayout
+        android:id="@+id/notification_content"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_toEndOf="@+id/read_indicator"
+        android:layout_toLeftOf="@+id/delete_button"
+        android:layout_toRightOf="@+id/read_indicator"
+        android:layout_toStartOf="@+id/delete_button"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/alert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:maxLines="2" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/delete_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:focusable="false"
+        android:text="Delete" />
+
+    <TextView
+        android:id="@+id/datetime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/notification_content"
+        android:layout_gravity="bottom"
+        android:layout_toLeftOf="@+id/delete_button"
+        android:layout_toStartOf="@+id/delete_button" />
+
+
+</RelativeLayout>
+```
+
+R1InboxMessage is an object that has the following methods to display details of inbox messages:
+
+***datetime***
+
+```java
+	inboxMessage.getDateTime()
+```
+Returns inbox message timestamp as epoch time in milliseconds
+
+***title***
+
+```java
+	inboxMessage.getTitle()
+```
+Returns inbox message title text 
+
+***alert***
+
+```java
+	inboxMessage.getAlert()
+```
+Returns inbox message alert text
+
+***readState***
+
+```java
+	inboxMessage.getReadState()
+```
+Returns the read state of an inbox message, values are R1InboxMessage.READ/ R1InboxMessage.UNREAD
+
+To display a number of unread messages use the following code:
+
+```java
+int unread = R1InboxManager.getInboxManager().getInboxUnreadCount(context);
+```
+
+To be notified for realtime updates of the number of unread messages you need to register R1InboxManager.OnInboxUpdateListener. To stop this updates you need to unregister it:
+
+```java
+R1InboxManager.getInboxManager().setInboxUpdateListener( new R1InboxManager.OnInboxUpdateListener() {
+            @Override
+            public void inboxUpdated() {
+                // inbox updated
+            }
+
+            @Override
+            public void inboxUpdateError() {
+				// error occurred while inbox updated
+            }
+        });
+```
+
+###vi. Deep Link Initialization
 
 Deep linking push messages open up a designated view in an application upon user response to a system notification.  To properly handle deep link push receipts, please read Android’s documentation on registering a custom URL scheme here:  http://developer.android.com/guide/topics/manifest/data-element.html
  
 
-###vi. Segment your Audience    
+###vii. Segment your Audience    
 
 You can specify Tags for *R1 Connect SDK* to send *Push Notifications* for certain groups of users.  You can then send *Push Notifications* to users with specific tags.
 
