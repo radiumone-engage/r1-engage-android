@@ -473,7 +473,7 @@ R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANN
                  
   ```                  
 
-### iv.  Ad Listener Events
+### iv. Ad Listener Events
 You can listen to panels using the R1EngageNotifier object. Add it before the start of any full-screen product or banner:
 
 Import the header file
