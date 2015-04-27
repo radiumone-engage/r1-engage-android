@@ -352,7 +352,7 @@ After integrating Mopub SDK with your application, add the MopubAdapter.jar libr
 
 
 
-### ii.  Integration of Offerwall, Interstitial and Video
+### ii. Integration of Offerwall, Interstitial and Video
 
 
 Import the following header files.
@@ -415,7 +415,7 @@ adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be 
 R1AdServer.getInstance(context).playVideo(adUnitIds);
 ```
 
-### iii.  Integration of Banner
+### iii. Integration of Banner
 
 Import the following header files that integrates banners
 
