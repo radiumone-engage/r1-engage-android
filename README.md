@@ -11,7 +11,7 @@
 		- [i. Ad Mediation SDKs Setup (Optional)](#user-content-i-ad-mediation-sdks-setup)
 		- [ii. Integration of Offerwall, Interstitial and Video](#user-content-ii-integration-of-offerwall-,-interstitial-and-video)
 		- [iii. Integration of Banner](#user-content-iii-integration-of-banner)
-		- [iv. Ad listener events](#user-content-iv-ad-listener-events)
+		- [iv. Ad Listener Events](#user-content-iv-ad-listener-events)
 		- [v. Ad Check Completion](#user-content-v-ad-check-completion)
 	- [b. Analytics Activation](#user-content-b-analytics-activation)
 		- [i. Automatic Events](#user-content-i-automatic-events)
@@ -473,7 +473,7 @@ R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANN
                  
   ```                  
 
-### iv.  Ad listener events
+### iv.  Ad Listener Events
 You can listen to panels using the R1EngageNotifier object. Add it before the start of any full-screen product or banner:
 
 Import the header file
