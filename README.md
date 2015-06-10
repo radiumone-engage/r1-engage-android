@@ -9,10 +9,8 @@
 - [3. Feature Activation](#user-content-3-feature-activation)
 	- [a. Engage Activation](#user-content-a-engage-activation)
 		- [i. Ad Mediation SDKs Setup (Optional)](#user-content-i-ad-mediation-sdks-setup)
-		- [ii. Integration of Offerwall, Interstitial and Video](#user-content-ii-integration-of-offerwall-,-interstitial-and-video)
-		- [iii. Integration of Banner](#user-content-iii-integration-of-banner)
-		- [iv. Ad Listener Events](#user-content-iv-ad-listener-events)
-		- [v. Ad Check Completion](#user-content-v-ad-check-completion)
+		- [ii. Integration of Offerwall, Interstitial, Video and Banner](#user-content-ii-integration-of-offerwall-,-interstitial-,-video-and-banner)
+		- [iii. Ad Check Completion](#user-content-iii-ad-check-completion)
 	- [b. Analytics Activation](#user-content-b-analytics-activation)
 		- [i. Automatic Events](#user-content-i-automatic-events)
 		- [ii. Standard Events](#user-content-ii-standard-events)
@@ -34,7 +32,7 @@
 		
 
 #1. System Requirements
-The R1 Connect SDK supports all mobile and tablet devices running Android 2.3 and above. Google Play Services must be 4.0 or above. 
+The R1 Connect SDK supports all mobile and tablet devices running Android 3.0 and above. Google Play Services must be 4.0 or above. 
 
 **Note:** We assume you have already set up Google Play Services in your project as it’s needed for using the Advertising ID.
 
@@ -102,6 +100,20 @@ Add R1Publisher activity in AndroidManifest.xml
 	android:name="com.radiumone.engage.publisher.R1Publisher" 
 	android:windowSoftInputMode="stateHidden" 
 	android:configChanges="orientation|keyboardHidden|screenSize"/>
+<activity
+            android:name="com.radiumone.engage.mraid.R1MraidActivity"
+            android:windowSoftInputMode="stateHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+
+ <activity
+            android:name="com.radiumone.engage.mraid.R1MraidVideoActivity"
+            android:windowSoftInputMode="stateHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+
+ <activity
+            android:name="com.radiumone.engage.mraid.R1MraidBrowser"
+            android:windowSoftInputMode="stateHidden"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
 ```
 Override onDestroy method for the activities which show Ads. 
 ```java
@@ -109,7 +121,7 @@ Override onDestroy method for the activities which show Ads.
 @Override
 protected void onDestroy() {
 	super.onDestroy();
-	R1AdServer.getInstance().onDestroy(this);
+	R1AdServer.getInstance(this).destroy();
 }
 ```
 ii. **Initializing when Analytics Enabled**  
@@ -352,7 +364,7 @@ After integrating Mopub SDK with your application, add the MopubAdapter.jar libr
 
 
 
-### ii. Integration of Offerwall, Interstitial and Video
+### ii. Integration of Offerwall, Interstitial, Video and Banner
 
 
 Import the following header files.
@@ -364,86 +376,177 @@ To show a full-screen product you must add the following (where context is your 
 
 #### a. Engage Only
 
-For Engage Ad network,  set the track Id(unique string) per ad placement which will be used to check for ad completion.
 
+**Show Offerwall**
+
+For Engage Offerwall,  set the placement Id(unique string) per ad offerwall placement which will be used to check for ad completion. Create a bundle and add the placement Ids.
 ```java
 
-Bundle adUnitIds = new Bundle();
-adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Engage Track Id for Offerwall"); // can be any unique string to track if offerwall ad  completion served by Engage.
-
-R1AdServer.getInstance(context).showOfferwall(adUnitIds); 
-
-
-Bundle adUnitIds = new Bundle();
-adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
-
-
-R1AdServer.getInstance(context).showInterstitial(adUnitIds); 
-
-Bundle adUnitIds = new Bundle();
-adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
-
-R1AdServer.getInstance(context).playVideo(adUnitIds);
+Bundle offerwallPlacementIds = new Bundle();
+offerwallPlacementIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Engage Placement Id for Offerwall"); // can be any unique string to track if offerwall ad  completion served by Engage.
 ```
-#### b. Engage With Mediation
-
-If mediation is turned on, add the ad placement keys to the bundle and pass it along when showing the ad type. Some ad networks support particular ad types. If the ad network does not support particular ad type or you have not create placement key then don't insert in the bundle.
+Add Offerwall listener to listen to the offerwall specific event
 
 ```java
+R1EngageOfferwall.R1EngageOfferwallListener offerwallListener = new R1EngageOfferwall.R1EngageOfferwallListener() {
+            @Override
+            public void onR1EngageOfferwallClosed() {
+                
+            }
 
-Bundle adUnitIds = new Bundle();
-adUnitIds.put(R1AdServer.ADAPTER_ADMOB, "Add Admob placement Id for Offerwall if available"); // if mediation is turned on and Admob SDK is integrated
-adUnitIds.put(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Offerwall if available");  // if mediation is turned on and Mopub SDK is integrated
-adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Engage Track Id for Offerwall"); // can be any unique string to track if offerwall ad  completion served by Engage.
+            @Override
+            public void onR1EngageOfferwallLoaded() {
 
-R1AdServer.getInstance(context).showOfferwall(adUnitIds); 
+            }
 
+            @Override
+            public void onR1EngageOfferwallClicked() {
 
-Bundle adUnitIds = new Bundle();
-adUnitIds.put(R1AdServer.ADAPTER_ADMOB, "Add Admob placement Id for Interstitial if available"); // if mediation is turned on and Admob SDK is integrated
-adUnitIds.put(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Interstitial if available");  // if mediation is turned on and Mopub SDK is integrated
-adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
+            }
 
+            @Override
+            public void onR1EngageOfferwallFailedToLoad() {
 
-R1AdServer.getInstance(context).showInterstitial(adUnitIds); 
-
-Bundle adUnitIds = new Bundle();
-adUnitIds.put(R1AdServer.ADAPTER_ADMOB, "Add Admob placement Id for Video if available");  // if mediation is turned on and Admob SDK is integrated
-adUnitIds.put(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Video if available");  // if mediation is turned on and Mopub SDK is integrated
-adUnitIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
-
-R1AdServer.getInstance(context).playVideo(adUnitIds);
+            }
+        };
+```
+Invoke show Offerwall with offerwall placementIds and listener
+```java
+R1AdServer.getInstance(context).showOfferwall(offerwallPlacementIds, offerwallListener); 
 ```
 
-### iii. Integration of Banner
+**Show Interstitial**
+
+For Engage Interstitial,  set the placement Id(unique string) per ad interstitial placement which will be used to check for ad completion. Create a bundle and add the placement Ids.
+```java
+Bundle interstitialPlacementIds = new Bundle();
+interstitialPlacementIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Placement Id for Engage");  // can be any unique string to track if interstitial ad  completion served by Engage.
+
+```
+Add Interstitial listener to listen to the interstitial specific event
+```java
+
+R1EngageInterstitial.R1EngageInterstitialListener interstitialListener = new R1EngageInterstitial.R1EngageInterstitialListener() {
+            @Override
+            public void onR1EngageInterstitialClosed() {
+                
+            }
+
+            @Override
+            public void onR1EngageInterstitialLoaded() {
+
+            }
+
+            @Override
+            public void onR1EngageInterstitialClicked() {
+
+            }
+
+            @Override
+            public void onR1EngageInterstitialFailedToLoad() {
+
+            }
+        };
+```
+Invoke show Interstitial with interstitial placementIds and listener
+
+```java
+R1AdServer.getInstance(context).showInterstitial(interstitialPlacementIds, interstitialListener); 
+```
+
+**Show Video**
+
+For Engage Video,  set the placement Id(unique string) per ad video placement which will be used to check for ad completion. Create a bundle and add the video placement Id.
+```java
+Bundle videoPlacementIds = new Bundle();
+videoPlacementIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track if video ad  completion served by Engage.
+```
+Add video listener to listen to the video specific event
+```java
+R1EngageVideo.R1EngageVideoListener videoListener = new R1EngageVideo.R1EngageVideoListener() {
+            @Override
+            public void onR1EngageVideoClosed() {
+                
+            }
+
+            @Override
+            public void onR1EngageVideoLoaded() {
+
+            }
+
+            @Override
+            public void onR1EngageVideoClicked() {
+
+            }
+
+            @Override
+            public void onR1EngageVideoFailedToLoad() {
+
+            }
+        };
+```
+Invoke show Video with video placement Ids and video Listener         
+```java
+R1AdServer.getInstance(context).showVideo(videoPlacementIds, videoListener);
+```
+
+**Show Banner**
 
 Import the following header files that integrates banners
 
 ```java
 import com.radiumone.engage.mediation.R1AdServer;
-import com.radiumone.engage.publisher.R1EngageBannerSize;
-import com.radiumone.engage.publisher.R1EngageBannerView;
-
+import com.radiumone.engage.publisher.R1EngageBanner
 ```
 
 The SDK supports several predefined banner types:
 
 ```ruby
-R1EngageBannerSize.BANNER_300_50
-R1EngageBannerSize.BANNER_320_50
-R1EngageBannerSize.BANNER_300_250
-R1EngageBannerSize.BANNER_480_50
-R1EngageBannerSize.BANNER_728_90
-R1EngageBannerSize.BANNER_1024_90
+R1EngageBanner.BANNER_300_50
+R1EngageBanner.BANNER_320_50
+R1EngageBanner.BANNER_300_250
+R1EngageBanner.BANNER_480_50
+R1EngageBanner.BANNER_728_90
+R1EngageBanner.BANNER_1024_90
 ```
 
-#### a. Engage Only 
 
 To add a banner of a predefined type you must add the following (where type is a predefined value from the above list):
+
+For Engage Banner,  set the placement Id(unique string) per ad banner placement which will be used to check for ad completion. Create a bundle and add banner placement Ids
 ```java
- Bundle adUnitBannerIds = new Bundle();
-adUnitBannerIds.putString(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track  banner ad  completion served by Engage.
-R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANNER_320_50, adUnitBannerIds);
+Bundle bannerPlacementIds = new Bundle();
+bannerPlacementIds.putString(R1AdServer.ADAPTER_ENGAGE, "Add banner placement Id for Engage");  // can be any unique string to track  banner ad  completion served by Engage.
+```
+Add  listener to listen to the banner specific event
+```java
+
+ R1EngageBanner.R1EngageBannerListener bannerListener = new R1EngageBanner.R1EngageBannerListener() {
+            @Override
+            public void onR1EngageBannerClosed() {
+                
+            }
+
+            @Override
+            public void onR1EngageBannerLoaded() {
+
+            }
+
+            @Override
+            public void onR1EngageBannerClicked() {
+
+            }
+
+            @Override
+            public void onR1EngageBannerFailedToLoad() {
+
+            }
+        };
+        
+   ```
+   Invoke show Banner with banner container, banner size, banner placement Ids and banner listener.
+   ```java
+R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBanner.BANNER_320_50, bannerPlacementIds, bannerListener);
               
   ```    
   where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programmatically or in xml layout of the view hierarchy.    
@@ -454,31 +557,31 @@ R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANN
  android:id="@+id/banner_container"/>
                  
   ``` 
-#### b. Engage with Ad Mediation 
-To add a banner when ad mediation is enabled. Get the placement Ids for all the ads from ad networks.
-```java
- Bundle adUnitBannerIds = new Bundle();
- adUnitBannerIds.putString(AdServer.ADAPTER_ADMOB,  "Add Admob placement Id for Banner if available"); // if 	  mediation is turned on and Admob SDK is integrated);
- adUnitBannerIds.putString(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for Banner if available"); // if mediation is turned on and Mopub SDK is integrated);
-adUnitBannerIds.putString(R1AdServer.ADAPTER_ENGAGE, "Add Track Id for Engage");  // can be any unique string to track  banner ad  completion served by Engage.
-R1AdServer.getInstance(this).showBanner(bannerContainer, R1EngageBannerSize.BANNER_320_50, adUnitBannerIds);
-              
-  ```    
-  where bannerContainer is Viewgroup to hold the banner ad. You can create banner Viewgroup programmatically or in xml layout of the view hierarchy.    
-```java
-<FrameLayout
- android:layout_width="match_parent"
- android:layout_height="wrap_content"
- android:id="@+id/banner_container"/>
-                 
-  ```                  
 
-### iv. Ad Listener Events
-You can listen to panels using the R1EngageNotifier object. Add it before the start of any full-screen product or banner:
+#### b. Engage With Mediation
+
+If mediation is turned on, add the ad placement keys to the bundle and pass it along when showing the ad type. Some ad networks support particular ad types. If the ad network does not support particular ad type or you have not create placement key then don't insert in the bundle.
+
+```java
+
+Bundle adPlacementIds = new Bundle();
+adPlacementIds.put(R1AdServer.ADAPTER_ADMOB, "Add Admob placement Id for that ad type if available"); // if mediation is turned on and Admob SDK is integrated
+adPlacementIds.put(R1AdServer.ADAPTER_MOPUB, "Add Mopub placement Id for that ad type if available");  // if mediation is turned on and Mopub SDK is integrated
+adPlacementIds.put(R1AdServer.ADAPTER_ENGAGE, "Add Engage placement Id for that ad type"); // can be any unique string to track if offerwall ad  completion served by Engage.
+
+
+```
+
+As explained in #Integration of Offerwall, Interstitial, Video and Banner add the ad listener to listen to the ad specific events and invoke show on that ad type.
+
+
+### iii. Ad Check Completion 
+
+Add check Completion listener to listen to the ad completion events.  Callback methods will be invoked with completed engage placement Ids and total rewards earned through engage placement. SDK does not return third party ad network placement ids or rewards upon their ad completion. 
 
 Import the header file
 ```java
-import com.radiumone.engage.publisher.R1EngageNotifier;
+import com.radiumone.engage.publisher.R1CheckAdCompletion;;
 ```
 
 Add r1engageNotifier listener that will listen to ad events.
@@ -486,70 +589,25 @@ Add r1engageNotifier listener that will listen to ad events.
 Here is an example:
 
 ```java
-private R1EngageNotifier r1engageNotifier = new R1EngageNotifier() {
+ R1CheckAdCompletion completionListener = new R1CheckAdCompletion() {
         @Override
-        public void didAdReceiveNewReward(int rewards) {
-           
-        }
-
-        @Override
-        public void didAdClosed() {
-            Toast.makeText(R1EngageDemo.this, "Closed", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void didAdHasOffers(final String adNetwork) {
-            
-
-        }
-
-        @Override
-        public void didAdError() {
-              }
-
-        @Override
-        public void didAdHasNoOffers() {
-             }
-    };
-```
-
-```java
-R1AdServer.getInstance(this).setR1EngageNotifier(r1engageNotifier);
-```
-
-**didAdReceiveNewReward** - This method is invoked when Engage offer is completed. Since each offer has its own virtual currency, it will be pass down to this method after its completion.
-
-**didAdClosed** - This method is invoked when the ad is closed and control is back to main application.
-
-**didAdHasOffers** - This method is invoked when ad with offers is loaded. The ad Network name is passed to this method which loads up the ad. 
-
-**didAdError** - This method is invoked when ad network fails to load the ad.
-
-**didAdHasNoOffers** - This method is invoked when no ad network is available to fill the ad.
-
-### v. Ad Check Completion
-
-Import the header file. 
-
-```java
-import com.radiumone.engage.publisher.R1CheckAdCompletion;
-```
-
-Add check Completion listener. This listener will listen to the completed events when checkCompletion method is invoked.
-```java
- R1AdServer.getInstance(this).setCheckCompletion(new R1CheckAdCompletion() {
-            @Override
-            public void getCompletedTrackIds(ArrayList<String> completedList) {
-
+            public void getCompletedEngagePlacementIds(ArrayList<String> completedList) {
+                Log.i("Completed","Track Id list " +completedList.size());
             }
-        });
+
+        @Override
+            public void getEarnedRewards(int rewards) {
+                Log.i("Completed","Rewards " +rewards);
+            }
+        };
+ R1AdServer.getInstance(context).setCheckCompletion(completionListener);
 ```
 
-Invoke the checkCompletion method to get the completed Ad trackIds.
 
-```java
- R1AdServer.getInstance(this).checkCompletions(this);
- ```
+**getCompletedEngagePlacementIds** - This method returns the completed engage placement Ids on Ad completion. Once method is invoked we remove it from our sdk so the next completion call will not return the previous completed placementId. 
+
+**getEarnedRewards** - This method returns the rewards earned per completed ad.
+
  
 ##b. Analytics Activation
 ### i. Automatic Events
