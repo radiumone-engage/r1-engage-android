@@ -3,13 +3,13 @@
 - [2. SDK Initialization](#user-content-2-sdk-initialization)
 	- [a. Import the Library](#user-content-a-import-the-library-to-your-project)
 	- [b. Initialize the SDK ](#user-content-b-initialize-the-sdk)
-	- [c. Adding R1Connect.properties](#user-content-c-adding-r1connect-properties)
+	- [c. Adding R1Connect properties](#user-content-c-adding-r1connect-properties)
 	- [d. Update the manifest](#user-content-d-update-the-manifest)
-	- [e. Advance Settings](#user-content-e—advance-settings)
+	- [e. Advance Settings](#user-content-e-advance-settings)
 - [3. Feature Activation](#user-content-3-feature-activation)
 	- [a. Engage Activation](#user-content-a-engage-activation)
 		- [i. Ad Mediation SDKs Setup (Optional)](#user-content-i-ad-mediation-sdks-setup)
-		- [ii. Integration of Offerwall, Interstitial, Video and Banner](#user-content-ii-integration-of-offerwall-,-interstitial-,-video-and-banner)
+		- [ii. Integration of Different Ad Placement Types](#user-content-ii-integration-of-different-ad-placement-types)
 		- [iii. Ad Check Completion](#user-content-iii-ad-check-completion)
 	- [b. Analytics Activation](#user-content-b-analytics-activation)
 		- [i. Automatic Events](#user-content-i-automatic-events)
@@ -147,7 +147,7 @@ Set the user Id with your own user Id. It can be a social network id like Facebo
 R1AdServer.getInstance(this).setUserId("< User ID>"); 
 ```
 
-##c. Adding R1Connect.properties
+##c. Adding R1Connect Properties
 
 To configure how the library will be used in your project you will need to create a file called r1connect.properties in the assets directory of your project.
 
@@ -364,7 +364,7 @@ After integrating Mopub SDK with your application, add the MopubAdapter.jar libr
 
 
 
-### ii. Integration of Offerwall, Interstitial, Video and Banner
+### ii. Integration of Different Ad Placement Types
 
 
 Import the following header files.
@@ -1712,7 +1712,7 @@ R1Push.getInstance(context).setTags(Arrays.asList("tag1","tag2"));
 String[] allTags = R1Push.getInstance(context).getTags(context);
 ```
 
-##c. Attribution Tracking Activation
+##d. Attribution Tracking Activation
 ###i. Track RadiumOne Campaigns
 Please contact your Account Manager to setup R1 ad campaigns as well as tracking campaigns.  If you don't have one, please contact us [here](http://radiumone.com/contact-mobile-team.html) and one of our Account Managers will assist you.
 
