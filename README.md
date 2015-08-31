@@ -59,8 +59,8 @@ In Android studio, the build.gradle should include the library and Google Play S
 
 ```java
 dependencies {
-   compile files('libs/LibConnectEngage.jar')
-   compile ‘com.google.android.gms:play-services:4.3.+'
+   compile files('libs/LibR1ConnectEngage.jar')
+   compile 'com.google.android.gms:play-services:4.3.+'
 }
 ```
 
